@@ -21,14 +21,14 @@ class KuhnTrainer:
             self.strategySum = np.zeros(numActions)
         
         def getStrategy(self, realizationWeight):
-            strategy = np.clip(self.regretSum, a_min=0, a_max=None)
-            normalizingSum = sum(strategy)
+            self.strategy = np.clip(self.regretSum, a_min=0, a_max=None)
+            normalizingSum = sum(self.strategy)
             if (normalizingSum > 0):
-                strategy /= normalizingSum
+                self.strategy /= normalizingSum
             else:
-                strategy = np.repeat(1.0 / self.NUM_ACTIONS, self.NUM_ACTIONS)
-            self.strategySum += realizationWeight * strategy
-            return strategy
+                self.strategy = np.repeat(1.0 / self.NUM_ACTIONS, self.NUM_ACTIONS)
+            self.strategySum += realizationWeight * self.strategy
+            return self.strategy
 
         def getAverageStrategy(self):
             normalizingSum = sum(self.strategySum)
@@ -64,7 +64,7 @@ class KuhnTrainer:
         opponent = 1 - player
         # Return payoff for terminal states
         if (plays > 1):
-            terminalPass = history[plays - 1] == 'p'
+            terminalPass = history[-1] == 'p'
             doubleBet = history[-2:] == "bb"
             isPlayerCardHigher = cards[player] > cards[opponent]
             if (terminalPass):
@@ -83,17 +83,17 @@ class KuhnTrainer:
             node.infoSet = infoSet
             self.nodeMap[infoSet] = node
         # For each action, recursively call cfr with additional history and probability
-        node.strategy = node.getStrategy(p0 if player == 0 else p1)
+        strategy = node.getStrategy(p0 if player == 0 else p1)
         util = np.zeros(self.NUM_ACTIONS)
         nodeUtil = 0
         for a in range(self.NUM_ACTIONS):
             nextHistory = history + ("p" if a == 0 else "b")
             if (player == 0):
-                util[a] = -self.cfr(cards, nextHistory, p0 * node.strategy[a], p1)
+                util[a] = -self.cfr(cards, nextHistory, p0 * strategy[a], p1)
             else:
-                util[a] = -self.cfr(cards, nextHistory, p0, p1 * node.strategy[a])
-            # nodeUtil += node.strategy[a] * util[a]
-        nodeUtil = np.sum(node.strategy * util)
+                util[a] = -self.cfr(cards, nextHistory, p0, p1 * strategy[a])
+            # nodeUtil += strategy[a] * util[a]
+        nodeUtil = np.sum(strategy * util)
         # For each action, compute and accumulate counterfactual regret
 
         # for a in range(self.NUM_ACTIONS):
