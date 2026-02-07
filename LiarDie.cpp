@@ -31,20 +31,19 @@ public:
     
     // Get Liar Die node current mixed strategy through regret-matching
     const std::vector<double>& getStrategy() {
-        int len = strategy.size();
         double normalizingSum = 0.0;
 
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < numActions; i++) {
             strategy[i] = std::max(regretSum[i], 0.0);
             normalizingSum += strategy[i];
         }
 
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < numActions; i++) {
             if (normalizingSum > 0) {
                 strategy[i] /= normalizingSum;
             }
             else {
-                strategy[i] = 1.0 / len;
+                strategy[i] = 1.0 / numActions;
             }
             strategySum[i] += pPlayer * strategy[i];
         }
@@ -54,19 +53,18 @@ public:
 
     // Get Liar Die node average mixed strategy
     std::vector<double> getAverageStrategy() const {
-        int len = strategySum.size();
-        std::vector<double> avg(len);
+        std::vector<double> avg(numActions);
         double normalizingSum = 0.0;
 
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < numActions; i++) {
             normalizingSum += strategySum[i];
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < numActions; i++) {
             if (normalizingSum > 0) {
                 avg[i] = strategySum[i] / normalizingSum;
             }
             else {
-                avg[i] = 1.0 / len;
+                avg[i] = 1.0 / numActions;
             }
         }
         return avg;
@@ -162,6 +160,7 @@ public:
                         regret[actionIndex] = childUtil;
                         node.u += actionProb[actionIndex] * childUtil;
                     }
+                    // accumulate counterfactual regret for each action for the node
                     for (int a = 0; a < actionProb.size(); a++) {
                         regret[a] -= node.u;
                         node.regretSum[a] += node.pOpponent * regret[a];

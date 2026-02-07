@@ -10,9 +10,9 @@
 class DudoTrainer {
 public:
     // Dudo definitions
-    static const int NUM_SIDES = 6;
-    static const int NUM_ACTIONS = (2 * NUM_SIDES) + 1;
-    static const int DUDO = NUM_ACTIONS - 1;
+    const int NUM_SIDES = 6;
+    const int NUM_ACTIONS = (2 * NUM_SIDES) + 1;
+    const int DUDO = NUM_ACTIONS - 1;
 
     std::vector<int> claimNum{1,1,1,1,1,1,2,2,2,2,2,2};
     std::vector<int> claimRank{2,3,4,5,6,1,2,3,4,5,6,1};
@@ -230,15 +230,12 @@ public:
         std::cout << "Final average game value: " << util / iterations << "\n";
         std::cout << nodeMap.size() << " information sets \n";
 
-        // std::ofstream out("output.txt");
-        // for (const auto& [_, node] : nodeMap)
-        //     out << node.toString() << "\n";
     }
 };
 
 
 int main() {
     DudoTrainer trainer;
-    trainer.train(1);
+    trainer.train(10000);
     return 0;
 }
